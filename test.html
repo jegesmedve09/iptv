@@ -36,14 +36,16 @@ list2
                 return users.find(user => user.username === username && user.password === password);
             }
 
-            async function fetchM3U(listName) {
+            async function fetchM3UAndDisplay(listName) {
                 try {
                     const response = await fetch(`list/${listName}.m3u`);
                     if (!response.ok) {
                         throw new Error('Failed to fetch the M3U file');
                     }
                     const data = await response.text();
-                    document.body.innerHTML = `<pre>${data}</pre>`;
+                    // Replace the entire document content with M3U data
+                    document.body.innerHTML = '';
+                    document.body.appendChild(document.createTextNode(data));
                 } catch (error) {
                     document.body.innerHTML = '<h1>Error Loading M3U File</h1><p>Could not load the M3U file.</p>';
                 }
@@ -54,7 +56,7 @@ list2
             const validUser = validateUser(users, user, pass);
 
             if (validUser) {
-                fetchM3U(validUser.list);
+                fetchM3UAndDisplay(validUser.list);
             } else {
                 document.body.innerHTML = '<h1>Access Denied</h1><p>Invalid username or password.</p>';
             }
