@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IPTV M3U List</title>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const usersData = `
+username1
+password1
+list1
+--
+user2
+password2
+list2
+            `;
+
+            function parseUsers(data) {
+                const users = data.split('--').map(user => {
+                    const [username, password, list] = user.trim().split('\n');
+                    return { username, password, list };
+                });
+                return users;
+            }
+
+            function getQueryParams() {
+                const params = new URLSearchParams(window.location.search);
+                return {
+                    user: params.get('user'),
+                    pass: params.get('pass')
+                };
+            }
+
+            function validateUser(users, username, password) {
+                return users.find(user => user.username === username && user.password === password);
+            }
+
+            async function fetchM3U(listName) {
+                try {
+                    const response = await fetch(`list/${listName}.m3u`);
+                    if (!response.ok) {
+                        throw new Error('Failed to fetch the M3U file');
+                    }
+                    const data = await response.text();
+                    document.body.innerHTML = `<pre>${data}</pre>`;
+                } catch (error) {
+                    document.body.innerHTML = '<h1>Error Loading M3U File</h1><p>Could not load the M3U file.</p>';
+                }
+            }
+
+            const users = parseUsers(usersData);
+            const { user, pass } = getQueryParams();
+            const validUser = validateUser(users, user, pass);
+
+            if (validUser) {
+                fetchM3U(validUser.list);
+            } else {
+                document.body.innerHTML = '<h1>Access Denied</h1><p>Invalid username or password.</p>';
+            }
+        });
+    </script>
+</head>
+<body>
+    <p>Loading...</p>
+</body>
+</html>
